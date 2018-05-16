@@ -1,3 +1,21 @@
+var nodemailer = require('nodemailer');
+var mg = require('nodemailer-mailgun-transport');
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').load();
+}else{
+
+}
+
+// This is your API key that you retrieve from www.mailgun.com/cp (free up to 10K monthly emails)
+var auth = {
+  auth: {
+    api_key: process.env.MAILGUN_API_KEY,
+    domain: process.env.MAILGUN_API_DOMAIN
+  }
+}
+
+var nodemailerMailgun = nodemailer.createTransport(mg(auth));
 var log = console.log;
 
 log('Secret santa js');
@@ -31,7 +49,6 @@ function assignSecretSantas(people){
 
 function getRecipient(person, recipientList){
 	var availableRecipients = people.slice();
-	//availableRecipients.splice(availableRecipients.indexOf(person), 1);
 
 	recipientList.forEach(function(recipient){
 		availableRecipients.splice(availableRecipients.indexOf(recipient), 1);
@@ -64,8 +81,27 @@ function assignRecipient(santa, recipient, recipientList){
 	recipientList.push(recipient);
 }
 
+function sendNotificationEmail(person){
+	var emailText = person.name + ', you will be giving your gift to ' + person.recipient.name + '!';
+
+	nodemailerMailgun.sendMail({
+		from: process.env.FROM_EMAIL,
+		to: process.env.TEST_TO_EMAIL, // An array if you have multiple recipients.
+		subject: person.name + ', you\'re Secret Santa recipient has been chosen!',
+		text: emailText,
+	}, function (err, info) {
+		if (err) {
+			console.log('Error: ' + err);
+		}
+		else {
+			console.log('Response: ' + info);
+		}
+	});
+};
+
 assignSecretSantas(people);
 
 people.forEach(function(person){
 	log(person.name + ' -> ' + person.recipient.name);
+	sendNotificationEmail(person);
 });
