@@ -1,5 +1,12 @@
 var nodemailer = require('nodemailer');
 var mg = require('nodemailer-mailgun-transport');
+const readline = require('readline');
+var log = console.log;
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').load();
@@ -7,7 +14,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 }
 
-// This is your API key that you retrieve from www.mailgun.com/cp (free up to 10K monthly emails)
 var auth = {
   auth: {
     api_key: process.env.MAILGUN_API_KEY,
@@ -16,11 +22,7 @@ var auth = {
 }
 
 var nodemailerMailgun = nodemailer.createTransport(mg(auth));
-var log = console.log;
 
-log('Secret santa js');
-
-var idIter = 0;
 function Person(name, email, excludedRecipients){
 	this.name = name;
 	this.email = email;
@@ -28,18 +30,39 @@ function Person(name, email, excludedRecipients){
 	this.excludedRecipients = excludedRecipients;
 }
 
-var brian = new Person('Brian', 'brian@brian.com', ['Monique']);
-var monique = new Person('Monique', 'mo@mo.com', ['Brian']);
+var people = [];
 
-var kristin = new Person('Kristin', 'kristin@kristin.com', ['John']);
-var john = new Person('John', 'john@john.com', ['Kristin']);
+function promptUser(){
+	log('--Type "done" to finish entering Santas--')
+	rl.question('Enter secret santa name: ', (name) => {
+		if(name != 'done'){
+			rl.question('Enter secret santa email: ', (email) => {
+				if(email != 'done'){
+					rl.question(`Who should be excluded for ${name} (comma delimited): `, (excludedNames) => {
+						if(email != 'done'){
+							var excludedNamesString = excludedNames.replace(/\s/g, '');
+							var excludedNamesArray = excludedNamesString.split(',');
+							console.log(`Thank you for your valuable feedback: ${name} : ${email}`);
+							var newSecretSanta = new Person(name, email, excludedNamesArray);
+							people.push(newSecretSanta);
 
-var matt = new Person('Matt', 'matt@matt.com', ['Lauren']);
-var lauren = new Person('Lauren', 'lareun@lareun.com', ['Matt']);
+							promptUser();
+						}
+					})
+				}else{
+					rl.close();
+				}
+			});
+		}else{
+			rl.close();
+		}
+	});
+}
 
-var people = [brian, monique, kristin, john, matt, lauren];
+promptUser();
 
 function assignSecretSantas(people){
+	console.log('assignSecretSantas')
 	var recipientList = [];
 
 	people.forEach(function(person){
@@ -99,9 +122,14 @@ function sendNotificationEmail(person){
 	});
 };
 
-assignSecretSantas(people);
+rl.on('close', () => {
+  // This will override SIGTSTP and prevent the program from going to the
+  // background.
+  console.log('on close');
+  assignSecretSantas(people);
 
-people.forEach(function(person){
-	log(person.name + ' -> ' + person.recipient.name);
-	sendNotificationEmail(person);
+	people.forEach(function(person){
+		log(person.name + ' -> ' + person.recipient.name);
+		sendNotificationEmail(person);
+	});
 });
