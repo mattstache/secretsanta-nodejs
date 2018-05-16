@@ -87,7 +87,7 @@ function sendNotificationEmail(person){
 	nodemailerMailgun.sendMail({
 		from: process.env.FROM_EMAIL,
 		to: process.env.TEST_TO_EMAIL, // An array if you have multiple recipients.
-		subject: person.name + ', you\'re Secret Santa recipient has been chosen!',
+		subject: person.name + ', your Secret Santa recipient has been chosen!',
 		text: emailText,
 	}, function (err, info) {
 		if (err) {
