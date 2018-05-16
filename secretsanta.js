@@ -42,7 +42,7 @@ function promptUser(){
 						if(email != 'done'){
 							var excludedNamesString = excludedNames.replace(/\s/g, '');
 							var excludedNamesArray = excludedNamesString.split(',');
-							console.log(`Thank you for your valuable feedback: ${name} : ${email}`);
+							console.log(`Santa added: ${name} : ${email}`);
 							var newSecretSanta = new Person(name, email, excludedNamesArray);
 							people.push(newSecretSanta);
 
@@ -62,7 +62,6 @@ function promptUser(){
 promptUser();
 
 function assignSecretSantas(people){
-	console.log('assignSecretSantas')
 	var recipientList = [];
 
 	people.forEach(function(person){
@@ -81,7 +80,6 @@ function getRecipient(person, recipientList){
 
 	// try again if the santa got themselves of if the recipient is in the excluded list
 	if(typeof availableRecipients[rand] != 'undefined' && (person.excludedRecipients.includes(availableRecipients[rand].name) || availableRecipients[rand].name == person.name)){
-		console.log("try again")
 		// todo if person is the only one in recipient list, start over
 		getRecipient(person, recipientList);
 		return;
@@ -123,9 +121,6 @@ function sendNotificationEmail(person){
 };
 
 rl.on('close', () => {
-  // This will override SIGTSTP and prevent the program from going to the
-  // background.
-  console.log('on close');
   assignSecretSantas(people);
 
 	people.forEach(function(person){
