@@ -31,13 +31,14 @@ function Person(name, email, excludedRecipients){
 }
 
 var people = [];
+var cancelSend = false;
 
 function promptUser(){
 	log('--Type "done" to finish entering Santas--')
 	rl.question('Enter secret santa name: ', (name) => {
-		if(name != 'done'){
+		if(name != 'done' && name != 'cancel'){
 			rl.question('Enter secret santa email: ', (email) => {
-				if(email != 'done'){
+				if(email != 'done' && email != 'cancel'){
 					rl.question(`Who should be excluded for ${name} (comma delimited): `, (excludedNames) => {
 						if(email != 'done'){
 							var excludedNamesString = excludedNames.replace(/\s/g, '');
@@ -49,10 +50,16 @@ function promptUser(){
 							promptUser();
 						}
 					})
+				}else if(email == 'cancel'){
+					cancelSend = true;
+					rl.close();
 				}else{
 					rl.close();
 				}
 			});
+		}else if(name == 'cancel'){
+			cancelSend = true;
+			rl.close();
 		}else{
 			rl.close();
 		}
@@ -121,10 +128,12 @@ function sendNotificationEmail(person){
 };
 
 rl.on('close', () => {
-  assignSecretSantas(people);
+	if(!cancelSend){
+		assignSecretSantas(people);
 
-	people.forEach(function(person){
-		log(person.name + ' -> ' + person.recipient.name);
-		sendNotificationEmail(person);
-	});
+		people.forEach(function(person){
+			log(person.name + ' -> ' + person.recipient.name);
+			sendNotificationEmail(person);
+		});
+	}
 });
