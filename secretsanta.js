@@ -33,40 +33,58 @@ function Person(name, email, excludedRecipients){
 var people = [];
 var cancelSend = false;
 
-function promptUser(){
-	log('--Type "done" to finish entering Santas--')
-	rl.question('Enter secret santa name: ', (name) => {
-		if(name != 'done' && name != 'cancel'){
-			rl.question('Enter secret santa email: ', (email) => {
-				if(email != 'done' && email != 'cancel'){
-					rl.question(`Who should be excluded for ${name} (comma delimited): `, (excludedNames) => {
-						if(email != 'done'){
-							var excludedNamesString = excludedNames.replace(/\s/g, '');
-							var excludedNamesArray = excludedNamesString.split(',');
-							console.log(`Santa added: ${name} : ${email}`);
-							var newSecretSanta = new Person(name, email, excludedNamesArray);
-							people.push(newSecretSanta);
+// function promptUser(){
+// 	log('--Type "done" to finish entering Santas--')
+// 	rl.question('Enter secret santa name: ', (name) => {
+// 		if(name != 'done' && name != 'cancel'){
+// 			rl.question('Enter secret santa email: ', (email) => {
+// 				if(email != 'done' && email != 'cancel'){
+// 					rl.question(`Who should be excluded for ${name} (comma delimited): `, (excludedNames) => {
+// 						if(email != 'done'){
+// 							var excludedNamesString = excludedNames.replace(/\s/g, '');
+// 							var excludedNamesArray = excludedNamesString.split(',');
+// 							console.log(`Santa added: ${name} : ${email}`);
+// 							var newSecretSanta = new Person(name, email, excludedNamesArray);
+// 							people.push(newSecretSanta);
 
-							promptUser();
-						}
-					})
-				}else if(email == 'cancel'){
-					cancelSend = true;
-					rl.close();
-				}else{
-					rl.close();
-				}
-			});
-		}else if(name == 'cancel'){
-			cancelSend = true;
-			rl.close();
-		}else{
-			rl.close();
-		}
+// 							promptUser();
+// 						}
+// 					})
+// 				}else if(email == 'cancel'){
+// 					cancelSend = true;
+// 					rl.close();
+// 				}else{
+// 					rl.close();
+// 				}
+// 			});
+// 		}else if(name == 'cancel'){
+// 			cancelSend = true;
+// 			rl.close();
+// 		}else{
+// 			rl.close();
+// 		}
+// 	});
+// }
+
+// promptUser();
+
+people.push(new Person("Matt", "mattalarie@gmail.com", ["Lauren"]));
+people.push(new Person("Lauren", "Lauren@gmail.com", ["Matt"]));
+people.push(new Person("Kristin", "Kristin@gmail.com", ["John"]));
+people.push(new Person("John", "John@gmail.com", ["Kristin"]));
+people.push(new Person("Mo", "Mo@gmail.com", ["Brian"]));
+people.push(new Person("Brian", "Brian@gmail.com", ["Mo"]));
+
+processSantas();
+
+function processSantas(){
+	assignSecretSantas(people);
+
+	people.forEach(function(person){
+		log(person.name + ' -> ' + person.recipient.name);
+		sendNotificationEmail(person);
 	});
 }
-
-promptUser();
 
 function assignSecretSantas(people){
 	var recipientList = [];
@@ -127,13 +145,13 @@ function sendNotificationEmail(person){
 	});
 };
 
-rl.on('close', () => {
-	if(!cancelSend){
-		assignSecretSantas(people);
+// rl.on('close', () => {
+// 	if(!cancelSend){
+// 		assignSecretSantas(people);
 
-		people.forEach(function(person){
-			log(person.name + ' -> ' + person.recipient.name);
-			sendNotificationEmail(person);
-		});
-	}
-});
+// 		people.forEach(function(person){
+// 			log(person.name + ' -> ' + person.recipient.name);
+// 			sendNotificationEmail(person);
+// 		});
+// 	}
+// });
